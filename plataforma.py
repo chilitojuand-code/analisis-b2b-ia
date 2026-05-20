@@ -16,6 +16,21 @@ except Exception:
 st.title("📊 Sistema Inteligente de Análisis de Clientes B2B")
 st.subheader("SaaS de Procesamiento Masivo de Datos con Inteligencia Artificial")
 
+# ---- CANDADO DE COBRO CON TU WHATSAPP DIRECTO ----
+st.warning("⚠️ VERSIÓN DE EVALUACIÓN ACTIVADA. Tu cuenta gratuita te permite procesar archivos de prueba de hasta 3 filas.")
+
+# !!! REEMPLAZA LOS CEROS POR TU NÚMERO REAL DE CELULAR (Ejemplo: 573101234567) !!!
+# IMPORTANTE: Debes poner el 57 al principio que es el código de Colombia
+numero_celular = "573208040294" 
+
+mensaje_whatsapp = "Hola Juan Diego, probé tu software de análisis masivo de clientes y quiero activar la suscripción comercial mensual para procesar mis archivos de Excel completos."
+link_whatsapp = f"https://wa.me{numero_celular}?text={mensaje_whatsapp.replace(' ', '%20')}"
+
+st.markdown(f"### 🚀 [▶️ HAZ CLIC AQUÍ PARA COMPRAR TU LICENCIA COMERCIAL ($100.000 COP/Mes)]({link_whatsapp})")
+st.info("💳 Medios de pago aceptados al instante: **NEQUI** o **DAVIPLATA**.")
+st.markdown("---")
+# --------------------------------------------------
+
 # 1. Zona de carga de archivos en la interfaz web
 st.markdown("### 📥 1. Sube la base de datos de tu empresa")
 archivo_cargado = st.file_uploader("Arrastra aquí tu archivo Excel o CSV con los comentarios", type=["xlsx", "csv"])
@@ -56,14 +71,19 @@ if archivo_cargado is not None:
             
         st.success(f"✅ Archivo '{archivo_cargado.name}' cargado con éxito. Se detectaron {len(df)} registros.")
         
-        col_texto = [c for c in df.columns if 'texto' in c.lower() or 'comentario' in c.lower() or 'opinion' in c.lower() or 'review' in c.lower()][0]
-        col_cliente = [c for c in df.columns if 'nombre' in c.lower() or 'usuario' in c.lower() or 'cliente' in c.lower()][0]
+        # Limitar a 3 filas en la versión gratuita
+        df_recortado = df.head(3)
+        if len(df) > 3:
+            st.warning("⚠️ Archivo limitado automáticamente a las primeras 3 filas por ser cuenta de evaluación. Adquiere la licencia comercial arriba para procesar todo el archivo completo.")
+        
+        col_texto = [c for c in df_recortado.columns if 'texto' in c.lower() or 'comentario' in c.lower() or 'opinion' in c.lower() or 'review' in c.lower()][0]
+        col_cliente = [c for c in df_recortado.columns if 'nombre' in c.lower() or 'usuario' in c.lower() or 'cliente' in c.lower()][0]
         
         if st.button("🚀 Iniciar Procesamiento Masivo con IA"):
             progreso = st.progress(0)
             resultados_totales = []
             
-            for i, fila in df.iterrows():
+            for i, fila in df_recortado.iterrows():
                 texto_cliente = str(fila[col_texto])
                 nombre_cliente = str(fila[col_cliente])
                 analisis_ia = analizar_texto_ia(texto_cliente)
@@ -74,12 +94,12 @@ if archivo_cargado is not None:
                     "texto_original": texto_cliente,
                     "inteligencia_ia": analisis_ia
                 })
-                progreso.progress((i + 1) / len(df))
+                progreso.progress((i + 1) / len(df_recortado))
             
             st.session_state['datos_procesados'] = resultados_totales
-            st.success("🎉 ¡Procesamiento masivo completado con éxito!")
+            st.success("🎉 ¡Procesamiento completado con éxito!")
     except Exception as e:
-        st.error(f"Falta una columna válida de 'Cliente' o 'Texto' en tu archivo: {e}")
+        st.error(f"Asegúrate de que tu archivo tenga una columna llamada 'Cliente' y otra llamada 'Texto'.")
 
 st.markdown("---")
 
